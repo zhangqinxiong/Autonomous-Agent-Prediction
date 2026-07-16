@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+
+# Environment variables (contains API keys)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Submission artifacts
+submissions/*/submission.zip
+submissions/*/output/
+submissions/*/agent/skills/
+
+# Generated data files
+**/*_processed.csv
+**/submission*.csv
+data/data/*/submission.csv
+data/data/*/*_processed.csv
+data/data/*/*_preprocessed.csv
+
+# Large zip files
+*.zip
+
+# Dataset directory (large binary data)
+data/data/
+
+# OS files
+.DS_Store
+Thumbs.db
