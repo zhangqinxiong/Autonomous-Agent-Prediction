@@ -28,6 +28,18 @@ data/data/*/*_preprocessed.csv
 # Dataset directory (large binary data)
 data/data/
 
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# CatBoost temporary files
+catboost_info/
+
+# Local competition data (downloaded via kagglehub)
+input/
+
+# Evaluation output
+output/
+
 # OS files
 .DS_Store
 Thumbs.db

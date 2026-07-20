@@ -50,10 +50,8 @@ for c in cat_cols:
 ```
 
 Review the output. Note:
-- Which columns have high missing rates (>=50%) — candidates for dropping
-- Which columns have low missing rates — candidates for filling
-- Which columns are categorical and their cardinality
-- Whether any categorical columns have an obvious ordinal meaning
+- Which columns have missing values
+- Which columns are categorical
 - Target distribution (balanced or imbalanced)
 
 ### Phase 1: Baseline CatBoost
@@ -63,7 +61,6 @@ Write and run `01_baseline.py`. This script must be self-contained.
 ```python
 import pandas as pd, numpy as np
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import OrdinalEncoder
 from sklearn.metrics import roc_auc_score
 from catboost import CatBoostClassifier
 
@@ -80,35 +77,16 @@ train.drop(columns=[target], inplace=True)
 
 all_data = pd.concat([train, test]).reset_index(drop=True)
 
-# Step 1: Drop columns with >=50% missing
-for c in all_data.columns:
-    if all_data[c].dtype in [np.float64, np.int64, np.float32, np.int32]:
-        if all_data[c].isnull().mean() >= 0.5:
-            all_data.drop(columns=[c], inplace=True)
-
-# Step 2: Fill remaining missing
+# Step 1: Fill missing values
 for c in all_data.columns:
     if all_data[c].dtype in [np.float64, np.int64, np.float32, np.int32]:
         all_data[c] = all_data[c].fillna(all_data[c].median())
     else:
         all_data[c] = all_data[c].astype(str).fillna("MISSING")
 
-# Step 3: Encode categorical features
+# Step 2: One-hot encode all categorical features
 cat_cols = all_data.select_dtypes(include=["object"]).columns.tolist()
-ordinal_cols = []
-ohe_cols = []
-for c in cat_cols:
-    if all_data[c].nunique() > 10:
-        ordinal_cols.append(c)
-    else:
-        ohe_cols.append(c)
-
-X_all = all_data.copy()
-if ohe_cols:
-    X_all = pd.get_dummies(X_all, columns=ohe_cols, drop_first=False)
-if ordinal_cols:
-    oe = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
-    X_all[ordinal_cols] = oe.fit_transform(X_all[ordinal_cols])
+X_all = pd.get_dummies(all_data, columns=cat_cols, drop_first=False)
 
 n = len(train)
 X = X_all.iloc[:n].values
@@ -121,6 +99,7 @@ cv_scores = []
 for tr, va in skf.split(X, y):
     model = CatBoostClassifier(
         task_type="CPU",
+        loss_function="Logloss",
         auto_class_weights="Balanced",
         early_stopping_rounds=50,
         random_seed=42,
@@ -139,7 +118,7 @@ sub.to_csv("submission.csv", index=False)
 print("Saved submission.csv")
 ```
 
-**Important**: If you identified columns with clear ordinal meaning during EDA, adjust the `ordinal_cols`/`ohe_cols` split accordingly. Move known ordinal columns to `ordinal_cols` regardless of cardinality.
+
 
 Run:
 ```
