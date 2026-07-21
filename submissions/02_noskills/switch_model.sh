@@ -3,7 +3,7 @@
 #        ./switch_model.sh kaggle   # 切换到 gemini-3.5-flash（提交Kaggle）
 #        ./switch_model.sh          # 显示当前使用的模型
 
-AGENT_DIR="$(cd "$(dirname "$0")" && pwd)/agent"
+AGENT_DIR="$(cd "$(dirname "$0")/.." && pwd)/agent"
 YAML="$AGENT_DIR/agent.yaml"
 
 if [ ! -f "$YAML" ]; then
