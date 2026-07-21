@@ -42,7 +42,7 @@ input/
 output/
 
 # Submission artifacts (zipped for Kaggle)
-submissions/*/submission.zip
+submission/submission.zip
 
 # Generated data
 *.csv
