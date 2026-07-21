@@ -1,45 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
 # Virtual environment
 .venv/
+.venv*/
+venv/
 
-# Environment variables (contains API keys)
+# Environment & secrets
 .env
+*.key
+.env.local
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.egg-info/
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Submission artifacts
-submissions/*/submission.zip
-submissions/*/output/
-submissions/*/agent/skills/
+# OS
+.DS_Store
+Thumbs.db
 
-# Generated data files
-**/*_processed.csv
-**/submission*.csv
-data/data/*/submission.csv
-data/data/*/*_processed.csv
-data/data/*/*_preprocessed.csv
-
-# Large zip files
-*.zip
-
-# Dataset directory (large binary data)
-data/data/
-
-# Jupyter checkpoints
+# Jupyter
 .ipynb_checkpoints/
+*.ipynb
 
-# CatBoost temporary files
+# CatBoost
 catboost_info/
 
-# Local competition data (downloaded via kagglehub)
+# Competition data (gitignored - downloaded via kagglehub)
 input/
 
 # Evaluation output
 output/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Submission artifacts (zipped for Kaggle)
+submissions/*/submission.zip
+
+# Generated data
+*.csv
+!data/sample_submission/**/*.csv
+!input/*/sample_submission.csv
+
+# Python packages (local wheels committed, but not built)
+*.whl
+
+# Logs
+*.log
