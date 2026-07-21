@@ -4,7 +4,7 @@ A Kaggle-in-Kaggle competition where LLM-powered autonomous agents act as data
 scientists. Agents compete on 16 binary classification datasets by writing and
 executing Python code via tool-based interactions within a sandboxed container.
 
-**Current best: 0.823 Public LB** — Submission: `02_noskills`
+**Current best: 0.823 Public LB**
 
 ---
 
@@ -25,18 +25,15 @@ executing Python code via tool-based interactions within a sandboxed container.
 │       ├── test.csv                # Test set (features only)
 │       ├── sample_submission.csv   # Submission template
 │       └── solution.csv            # Ground truth (Public/Private split)
-├── submissions/
-│   └── 02_noskills/                # Current best submission
-│       ├── agent/
-│       │   ├── agent.yaml          # Agent config (model, tools, prompt)
-│       │   ├── prompts/
-│       │   │   └── system.md       # System prompt / workflow definition
-│       │   └── configs/
-│       │       └── sampling.yaml   # Generation parameters
-│       ├── switch_model.sh         # Toggle: local ↔ Kaggle model
-│       └── submission.zip         # Packaged for Kaggle upload
-├── docs/
-│   └── superpowers/                # Design documents & plans
+├── submission/                     # Agent submission
+│   ├── agent/
+│   │   ├── agent.yaml              # Agent config (model, tools, prompt)
+│   │   ├── prompts/
+│   │   │   └── system.md           # System prompt / workflow definition
+│   │   └── configs/
+│   │       └── sampling.yaml       # Generation parameters
+│   ├── switch_model.sh             # Toggle: local ↔ Kaggle model
+│   └── submission.zip              # Packaged for Kaggle upload
 ├── .gitignore
 └── README.md
 ```
@@ -75,47 +72,29 @@ print('Data downloaded to:', path)
 
 ```bash
 # Validate submission structure
-python3 data/validate_submission.py --agent-dir submissions/02_noskills/agent
+python3 data/validate_submission.py --agent-dir submission/agent
 
 # Run agent against a single dataset
 python3 data/run_local_eval.py \
-  --submission-dir submissions/02_noskills/agent \
+  --submission-dir submission/agent \
   --dataset train_01 \
   --metric roc_auc \
   --max-time-minutes 15 \
   --max-submissions 3
-
-# Test in Kaggle Docker environment
-docker run --rm \
-  -v $(pwd):/work -w /work \
-  gcr.io/kaggle-images/python:latest \
-  python3 submissions/02_noskills/agent/prompts/system.md
 ```
 
 ### Switch Model
 
 ```bash
 # Local testing (DeepSeek V3.2)
-bash submissions/02_noskills/switch_model.sh local
+bash submission/switch_model.sh local
 
 # Kaggle submission (Gemini 3.5 Flash)
-bash submissions/02_noskills/switch_model.sh kaggle
+bash submission/switch_model.sh kaggle
 
 # Check current model
-bash submissions/02_noskills/switch_model.sh
+bash submission/switch_model.sh
 ```
-
-### Baseline Pipeline (Local Test Script)
-
-Run the ensemble locally to reproduce CV scores:
-
-```bash
-python3 baseline.py
-```
-
-This runs CatBoost + XGBoost + LightGBM with 5-fold CV + target encoding across
-all 15 datasets (excluding train_14), outputting per-model CV, ensemble CV, and
-Public/Private/Full LB scores.
 
 ---
 
@@ -123,17 +102,17 @@ Public/Private/Full LB scores.
 
 ```bash
 # 1. Switch to Kaggle model
-bash submissions/02_noskills/switch_model.sh kaggle
+bash submission/switch_model.sh kaggle
 
 # 2. Package
-cd submissions/02_noskills/agent
+cd submission/agent
 zip -r ../submission.zip agent.yaml prompts/ configs/ \
   -x "*/.ipynb_checkpoints/*"
 
 # 3. Submit
 cd ../..
 kaggle competitions submit autonomous-agent-prediction-beta \
-  -f submissions/02_noskills/submission.zip \
+  -f submission/submission.zip \
   -m "description of changes"
 
 # 4. Check status
@@ -142,7 +121,7 @@ kaggle competitions submissions autonomous-agent-prediction-beta | head -10
 
 ---
 
-## Agent Strategy: `02_noskills`
+## Agent Strategy
 
 ### Workflow
 
@@ -169,7 +148,7 @@ early_stopping_rounds=50.
 
 | Model | Class Weight | Key Params |
 |-------|-------------|------------|
-| **CatBoost** | `auto_class_weights="Balanced"` | `loss_function="Logloss"`, symmetric trees |
+| **CatBoost** | `auto_class_weights="Balanced"` | `loss_function="Logloss"` |
 | **XGBoost** | `scale_pos_weight` (auto-computed) | `device="cuda"` |
 | **LightGBM** | `class_weight="balanced"` | `device="gpu"` |
 
@@ -219,5 +198,3 @@ ROC-AUC.
 - **train_14 is excluded** from all tests (reserved as a held-out challenge set)
 - The agent runs inside a Kaggle container **without GPU** — local GPU results
   serve as approximate upper bounds
-- `catboost_info/` is a runtime artifact that may be root-owned and can be safely
-  ignored

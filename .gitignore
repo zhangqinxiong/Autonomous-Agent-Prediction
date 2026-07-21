@@ -35,22 +35,19 @@ Thumbs.db
 # CatBoost
 catboost_info/
 
-# Competition data (gitignored - downloaded via kagglehub)
+# Competition data (downloaded via kagglehub)
 input/
 
 # Evaluation output
 output/
 
-# Submission artifacts (zipped for Kaggle)
+# Kaggle submission package
 submission/submission.zip
 
 # Generated data
 *.csv
 !data/sample_submission/**/*.csv
 !input/*/sample_submission.csv
-
-# Python packages (local wheels committed, but not built)
-*.whl
 
 # Logs
 *.log
